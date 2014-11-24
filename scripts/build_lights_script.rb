@@ -1,3 +1,5 @@
-# //#!/usr/local/rvm/bin/rvm-shell ruby-2.1.3
+#!/usr/bin/env ruby
 
 require '../lib/build_lights'
+
+BuildLights.new.build_lights

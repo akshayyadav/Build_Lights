@@ -7,7 +7,7 @@ class BuildLights
   @failed = false
   @passed = false
 
-  def Build_lights
+  def build_lights
     terminal_setup
     read_Jenkins
     instruct_Arduino
