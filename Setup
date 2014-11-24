@@ -1,0 +1,7 @@
+# SHELL=/bin/bash
+PATH=/home/devteam/build_lights_new
+# * * * * * source /etc/profile
+# * * * * * /usr/local/rvm/bin rvm user gemsets
+# * * * * * cd /home/devteam/build_lights_new && ruby main_script.rb > /tmp/mylog.log
+
+* * * * * ruby main_script.rb > /tmp/mylog.log
