@@ -7,23 +7,22 @@
 require 'nokogiri'
 require 'open-uri'
 
-
 doc = Nokogiri::HTML(open('http://ci.nat.bt.com/api/xml'))
 
 building = false
 failed = false
 passed = false
 
-TrafficLightInstructionFile = File.new("../tmp/TrafficLightCmd.txt","w")
+TrafficLightInstructionFile = File.new('../tmp/TrafficLightCmd.txt', 'w')
 
-File.open("../tmp/TrafficLightCmd.txt","w") {|file| file.truncate(0)}
+File.open('../tmp/TrafficLightCmd.txt', 'w') { |file| file.truncate(0) }
 
 doc.css('color').each do |link|
-# Search for xml-node <color> holding the build status of each tool
+  # Search for xml-node <color> holding the build status of each tool
 
-  if link.text.include? "blue_anime"
+  if link.text.include? 'blue_anime'
     building = true
-  elsif link.text.include? "red"
+  elsif link.text.include? 'red'
     failed = true
     # Leave the tool-status check loop upon detecting the 1st build-fail
   else
@@ -32,13 +31,12 @@ doc.css('color').each do |link|
 
 end
 
-
 if building == true
-  TrafficLightInstructionFile.puts("AMBER")
+  TrafficLightInstructionFile.puts('AMBER')
 elsif failed == true
-  TrafficLightInstructionFile.puts("RED")
+  TrafficLightInstructionFile.puts('RED')
 elsif passed == true
-  TrafficLightInstructionFile.puts("GREEN")
+  TrafficLightInstructionFile.puts('GREEN')
 end
 TrafficLightInstructionFile.close
 

@@ -1,9 +1,10 @@
 source 'https://rubygems.org'
 
 gem 'rake'
+gem 'nokogiri'
 
 group :development, :test do
-  gem 'debugger'
+  gem 'byebug'
 end
 
 group :test do
