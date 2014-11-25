@@ -1,10 +1,9 @@
 require 'nokogiri'
 require 'open-uri'
 require 'byebug'
-DEVICE_PATH  = '/dev/ttyS0'
+DEVICE_PATH  = '/dev/ttyUSB0'
 
 class BuildLights
-
 
   def build_lights
     terminal_setup
@@ -14,16 +13,12 @@ class BuildLights
 
   def read_Jenkins
 
-  @building = false
-  @failed = false
-  @passed = false
-
     doc = Nokogiri::HTML(open('http://ci.nat.bt.com/view/traffic_lights/api/xml'))
 
     doc.css('color').each do |link|
       # Search for xml-node <color> holding the build status of each tool
 
-      if link.text.include? 'blue_anime'
+      if ((link.text.include? 'blue_anime') || (link.text.include? 'red_anime') || (link.text.include? 'notbuilt_anime'))
         @building = true
       elsif link.text.include? 'red'
         @failed = true
@@ -34,18 +29,18 @@ class BuildLights
   end
 
   def instruct_Arduino
-    if (@building == true)
+    if @building
       system `echo "B" > #{DEVICE_PATH}`
-      puts 'BUILDING -- Waiting for build status'
-    elsif (@failed == true)
+      #puts 'BUILDING -- Waiting for build status'
+    elsif @failed
       system `echo "F" > #{DEVICE_PATH}`
-      puts 'RED ON -- Build errors on Jenkins'
-    elsif (@passed == true && @building == false && @failed == false)
+      #puts 'RED ON -- Build errors on Jenkins'
+    elsif @passed && !@building && !@failed
       system `echo "P" > #{DEVICE_PATH}`
-      puts 'GREEN ON -- Tools healthy on Jenkins'
+      #puts 'GREEN ON -- Tools healthy on Jenkins'
     else
       system `echo "N" > #{DEVICE_PATH}`
-      puts 'Error(unhandled text) check txt file'
+      #puts 'Error(unhandled text) check txt file'
     end
   end
 
