@@ -1,11 +1,10 @@
 require 'nokogiri'
 require 'open-uri'
+require 'byebug'
+DEVICE_PATH  = '/dev/ttyS0'
 
 class BuildLights
 
-  @building = false
-  @failed = false
-  @passed = false
 
   def build_lights
     terminal_setup
@@ -14,6 +13,11 @@ class BuildLights
   end
 
   def read_Jenkins
+
+  @building = false
+  @failed = false
+  @passed = false
+
     doc = Nokogiri::HTML(open('http://ci.nat.bt.com/view/traffic_lights/api/xml'))
 
     doc.css('color').each do |link|
@@ -23,7 +27,6 @@ class BuildLights
         @building = true
       elsif link.text.include? 'red'
         @failed = true
-        # Leave the tool-status check loop upon detecting the 1st build-fail
       else
         @passed = true
       end
@@ -31,18 +34,17 @@ class BuildLights
   end
 
   def instruct_Arduino
-    sleep 1
-    if @failed == true
-      system `echo "F" > /dev/ttyS3`
-      puts 'RED ON -- Build errors on Jenkins'
-    elsif @passed == true
-      system `echo "P" > /dev/ttyS3`
-      puts 'GREEN ON -- Tools healthy on Jenkins'
-    elsif @building == true
-      system `echo "B" > /dev/ttyS3`
+    if (@building == true)
+      system `echo "B" > #{DEVICE_PATH}`
       puts 'BUILDING -- Waiting for build status'
+    elsif (@failed == true)
+      system `echo "F" > #{DEVICE_PATH}`
+      puts 'RED ON -- Build errors on Jenkins'
+    elsif (@passed == true && @building == false && @failed == false)
+      system `echo "P" > #{DEVICE_PATH}`
+      puts 'GREEN ON -- Tools healthy on Jenkins'
     else
-      system `echo "N" > /dev/ttyS3`
+      system `echo "N" > #{DEVICE_PATH}`
       puts 'Error(unhandled text) check txt file'
     end
   end
@@ -50,11 +52,11 @@ class BuildLights
   private
 
   def set_term1
-    system `cat /dev/ttyS3`
+    system `cat #{DEVICE_PATH}`
   end
 
   def set_term2
-    system (`stty -F /dev/ttyS3 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts`)
+    system (`stty -F #{DEVICE_PATH} cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts`)
   end
 
   def terminal_setup
