@@ -4,7 +4,7 @@ const int RedPin = 12;     //RED LED connection
 const int GreenPin = 13;   //GREEN Led connection
 int incomingByte = 'B';         // a variable to read incoming serial data into
 int DEBUG = 0;
-int addr = 1;
+int addr = 0;
 int previous = 'B';
 
 
@@ -64,6 +64,15 @@ void lights_controller(int incomingByte) {
         EEPROM.write(addr, incomingByte);
         previous = incomingByte;
     }
+
+    else if (incomingByte == 'N')
+    {
+      digitalWrite(GreenPin, LOW);
+      digitalWrite(RedPin, LOW);
+      EEPROM.write(addr, incomingByte);
+      previous = incomingByte;
+    }
+
     else
     {
       EEPROM.write(addr, previous);

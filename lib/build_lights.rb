@@ -1,7 +1,8 @@
 require 'nokogiri'
 require 'open-uri'
 require 'byebug'
-DEVICE_PATH  = '/dev/cu.usbserial-A900acuZ'
+#DEVICE_PATH_MAC  = '/dev/cu.usbserial-A900acuZ'
+DEVICE_PATH = '/dev/ttyUSB0'
 
 class BuildLights
   def build_lights
@@ -14,8 +15,6 @@ class BuildLights
     doc = Nokogiri::HTML(open('http://ci.nat.bt.com/view/traffic_lights/api/xml'))
 
     doc.css('color').each do |link|
-      # Search for xml-node <color> holding the build status of each tool
-
       if (link.text.include? 'blue_anime') || (link.text.include? 'red_anime') || (link.text.include? 'notbuilt_anime')
         @building = true
       elsif link.text.include? 'red'
@@ -27,7 +26,11 @@ class BuildLights
   end
 
   def instruct_Arduino
-    if @building
+    debugger
+    if shutdown?
+      system `echo "N" > #{DEVICE_PATH}`
+      puts 'SHUTDOWN'
+    elsif @building
       system `echo "B" > #{DEVICE_PATH}`
       # puts 'BUILDING -- Waiting for build status'
     elsif @failed
@@ -36,13 +39,16 @@ class BuildLights
     elsif @passed && !@building && !@failed
       system `echo "P" > #{DEVICE_PATH}`
       # puts 'GREEN ON -- Tools healthy on Jenkins'
-    else
-      system `echo "N" > #{DEVICE_PATH}`
-      # puts 'Error(unhandled text) check txt file'
     end
   end
 
   private
+
+  def shutdown?
+    if (Time.now.hour < 7) && (Time.now.hour > 19)
+      return true
+    end
+  end
 
   def set_term1
     system `cat #{DEVICE_PATH}`
