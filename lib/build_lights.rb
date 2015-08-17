@@ -32,16 +32,16 @@ end
 
   def instruct_Arduino
     if @building
-      system `echo "B" > #{DEVICE_PATH}`
+      `echo "B" > #{DEVICE_PATH}`
       puts 'BUILDING -- Waiting for build status'
     elsif @failed
-      system `echo "F" > #{DEVICE_PATH}`
+      `echo "F" > #{DEVICE_PATH}`
       puts 'RED ON -- Build errors on Jenkins'
     elsif @passed && !@building && !@failed
-      system `echo "P" > #{DEVICE_PATH}`
+      `echo "P" > #{DEVICE_PATH}`
       puts 'GREEN ON -- Tools healthy on Jenkins'
     else
-      system `echo "N" > #{DEVICE_PATH}`
+      `echo "N" > #{DEVICE_PATH}`
       puts 'Error(unhandled text) check txt file'
     end
   end
@@ -55,11 +55,11 @@ end
   end
 
   def set_term1
-    system `cat #{DEVICE_PATH}`
+    system ("cat #{DEVICE_PATH}")
   end
 
   def set_term2
-    system (`stty -f #{DEVICE_PATH} cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts`)
+    system ("stty -f #{DEVICE_PATH} cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts")
   end
 
   def terminal_setup
