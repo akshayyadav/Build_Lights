@@ -1,5 +1,6 @@
 require 'nokogiri'
 require 'open-uri'
+require 'openssl'
 require 'byebug'
 #DEVICE_PATH_MAC  = '/dev/cu.usbserial-A900acuZ'
 DEVICE_PATH = '/dev/ttyUSB0'
@@ -14,8 +15,8 @@ class BuildLights
 def read_Jenkins
     jenkins_urls = 'http://ci.nat.bt.com/view/traffic_lights/api/xml','https://ci.diveboard.nat.bt.com/api/xml'
     jenkins_urls.map do |jenkins_url|
-    
-    doc = Nokogiri::HTML(open('http://ci.nat.bt.com/view/traffic_lights/api/xml'))
+
+    doc = Nokogiri::HTML(open(jenkins_url, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE}))
 
     doc.css('color').each do |link|
       if (link.text.include? 'blue_anime') || (link.text.include? 'red_anime') || (link.text.include? 'notbuilt_anime')
@@ -32,16 +33,16 @@ end
   def instruct_Arduino
     if @building
       system `echo "B" > #{DEVICE_PATH}`
-      #puts 'BUILDING -- Waiting for build status'
+      puts 'BUILDING -- Waiting for build status'
     elsif @failed
       system `echo "F" > #{DEVICE_PATH}`
-      #puts 'RED ON -- Build errors on Jenkins'
+      puts 'RED ON -- Build errors on Jenkins'
     elsif @passed && !@building && !@failed
       system `echo "P" > #{DEVICE_PATH}`
-      #puts 'GREEN ON -- Tools healthy on Jenkins'
+      puts 'GREEN ON -- Tools healthy on Jenkins'
     else
       system `echo "N" > #{DEVICE_PATH}`
-      #puts 'Error(unhandled text) check txt file'
+      puts 'Error(unhandled text) check txt file'
     end
   end
 
