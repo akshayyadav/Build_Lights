@@ -11,7 +11,10 @@ class BuildLights
     instruct_Arduino
   end
 
-  def read_Jenkins
+def read_Jenkins
+    jenkins_urls = 'http://ci.nat.bt.com/view/traffic_lights/api/xml','https://ci.diveboard.nat.bt.com/api/xml'
+    jenkins_urls.map do |jenkins_url|
+    
     doc = Nokogiri::HTML(open('http://ci.nat.bt.com/view/traffic_lights/api/xml'))
 
     doc.css('color').each do |link|
@@ -24,6 +27,7 @@ class BuildLights
       end
     end
   end
+end
 
   def instruct_Arduino
     if @building
